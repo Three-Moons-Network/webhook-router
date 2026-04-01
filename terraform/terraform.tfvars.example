@@ -1,0 +1,13 @@
+aws_region                        = "us-east-1"
+aws_profile                       = "default"
+project_name                      = "webhook-router"
+environment                       = "dev"
+stripe_secret                     = "whsec_..."
+shopify_secret                    = "..."
+github_secret                     = "..."
+lambda_memory                     = 256
+lambda_timeout                    = 60
+log_retention_days                = 30
+sqs_retention_seconds             = 345600
+enable_downstream_notifications   = false
+dynamodb_billing_mode             = "PAY_PER_REQUEST"

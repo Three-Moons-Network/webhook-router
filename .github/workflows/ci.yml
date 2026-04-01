@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Check formatting
+        run: ruff format --check src/ tests/
+
+      - name: Check linting
+        run: ruff check src/ tests/
+
+  terraform-validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5"
+
+      - name: Format check
+        run: terraform fmt -check -recursive
+
+      - name: Init
+        run: terraform init -backend=false
+
+      - name: Validate
+        run: terraform validate
+
+  package:
+    name: Package Lambdas
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build deployment packages
+        run: |
+          mkdir -p dist/{router,stripe,shopify,github,generic}-pkg
+          for pkg_dir in router stripe shopify github generic; do
+            pip install -r requirements.txt -t dist/${pkg_dir}-pkg/
+          done
+          cp src/router.py dist/router-pkg/
+          cp src/processors/stripe.py dist/stripe-pkg/
+          cp src/processors/shopify.py dist/shopify-pkg/
+          cp src/processors/github.py dist/github-pkg/
+          cp src/processors/generic.py dist/generic-pkg/
+          cd dist/router-pkg && zip -r ../router.zip .
+          cd ../stripe-pkg && zip -r ../stripe.zip .
+          cd ../shopify-pkg && zip -r ../shopify.zip .
+          cd ../github-pkg && zip -r ../github.zip .
+          cd ../generic-pkg && zip -r ../generic.zip .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-packages
+          path: |
+            dist/router.zip
+            dist/stripe.zip
+            dist/shopify.zip
+            dist/github.zip
+            dist/generic.zip
+          retention-days: 30
