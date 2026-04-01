@@ -458,7 +458,7 @@ resource "aws_lambda_function" "router" {
   role          = aws_iam_role.router.arn
 
   filename         = "${path.module}/../dist/router.zip"
-  source_code_hash = filebase64sha256("${path.module}/../dist/router.zip")
+  source_code_hash = fileexists("${path.module}/../dist/router.zip") ? filebase64sha256("${path.module}/../dist/router.zip") : null
 
   environment {
     variables = {
@@ -488,7 +488,7 @@ resource "aws_lambda_function" "processor_stripe" {
   role          = aws_iam_role.processor.arn
 
   filename         = "${path.module}/../dist/stripe.zip"
-  source_code_hash = filebase64sha256("${path.module}/../dist/stripe.zip")
+  source_code_hash = fileexists("${path.module}/../dist/stripe.zip") ? filebase64sha256("${path.module}/../dist/stripe.zip") : null
 
   environment {
     variables = {
@@ -516,7 +516,7 @@ resource "aws_lambda_function" "processor_shopify" {
   role          = aws_iam_role.processor.arn
 
   filename         = "${path.module}/../dist/shopify.zip"
-  source_code_hash = filebase64sha256("${path.module}/../dist/shopify.zip")
+  source_code_hash = fileexists("${path.module}/../dist/shopify.zip") ? filebase64sha256("${path.module}/../dist/shopify.zip") : null
 
   environment {
     variables = {
@@ -544,7 +544,7 @@ resource "aws_lambda_function" "processor_github" {
   role          = aws_iam_role.processor.arn
 
   filename         = "${path.module}/../dist/github.zip"
-  source_code_hash = filebase64sha256("${path.module}/../dist/github.zip")
+  source_code_hash = fileexists("${path.module}/../dist/github.zip") ? filebase64sha256("${path.module}/../dist/github.zip") : null
 
   environment {
     variables = {
@@ -572,7 +572,7 @@ resource "aws_lambda_function" "processor_generic" {
   role          = aws_iam_role.processor.arn
 
   filename         = "${path.module}/../dist/generic.zip"
-  source_code_hash = filebase64sha256("${path.module}/../dist/generic.zip")
+  source_code_hash = fileexists("${path.module}/../dist/generic.zip") ? filebase64sha256("${path.module}/../dist/generic.zip") : null
 
   environment {
     variables = {
