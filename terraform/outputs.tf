@@ -5,7 +5,7 @@ output "router_function_arn" {
 
 output "api_endpoint" {
   description = "Base URL for the webhook API"
-  value       = "${aws_apigatewayv2_api.main.api_endpoint}"
+  value       = aws_apigatewayv2_api.main.api_endpoint
 }
 
 output "stripe_webhook_url" {

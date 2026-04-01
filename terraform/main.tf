@@ -113,7 +113,7 @@ variable "log_retention_days" {
 variable "sqs_retention_seconds" {
   description = "SQS message retention in seconds"
   type        = number
-  default     = 345600  # 4 days
+  default     = 345600 # 4 days
 }
 
 variable "enable_downstream_notifications" {
@@ -232,8 +232,8 @@ resource "aws_sqs_queue" "stripe_dlq" {
 }
 
 resource "aws_sqs_queue" "stripe" {
-  name                      = "${local.prefix}-stripe"
-  message_retention_seconds = var.sqs_retention_seconds
+  name                       = "${local.prefix}-stripe"
+  message_retention_seconds  = var.sqs_retention_seconds
   visibility_timeout_seconds = var.lambda_timeout + 30
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.stripe_dlq.arn
@@ -247,8 +247,8 @@ resource "aws_sqs_queue" "shopify_dlq" {
 }
 
 resource "aws_sqs_queue" "shopify" {
-  name                      = "${local.prefix}-shopify"
-  message_retention_seconds = var.sqs_retention_seconds
+  name                       = "${local.prefix}-shopify"
+  message_retention_seconds  = var.sqs_retention_seconds
   visibility_timeout_seconds = var.lambda_timeout + 30
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.shopify_dlq.arn
@@ -262,8 +262,8 @@ resource "aws_sqs_queue" "github_dlq" {
 }
 
 resource "aws_sqs_queue" "github" {
-  name                      = "${local.prefix}-github"
-  message_retention_seconds = var.sqs_retention_seconds
+  name                       = "${local.prefix}-github"
+  message_retention_seconds  = var.sqs_retention_seconds
   visibility_timeout_seconds = var.lambda_timeout + 30
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.github_dlq.arn
@@ -277,8 +277,8 @@ resource "aws_sqs_queue" "generic_dlq" {
 }
 
 resource "aws_sqs_queue" "generic" {
-  name                      = "${local.prefix}-generic"
-  message_retention_seconds = var.sqs_retention_seconds
+  name                       = "${local.prefix}-generic"
+  message_retention_seconds  = var.sqs_retention_seconds
   visibility_timeout_seconds = var.lambda_timeout + 30
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.generic_dlq.arn
@@ -318,7 +318,7 @@ data "aws_iam_policy_document" "router_permissions" {
 
   # SSM Parameter Store — read secrets
   statement {
-    actions   = ["ssm:GetParameter"]
+    actions = ["ssm:GetParameter"]
     resources = [
       try(aws_ssm_parameter.stripe_secret[0].arn, "arn:aws:ssm:${var.aws_region}:*:parameter/${var.project_name}/${var.environment}/secrets/stripe"),
       try(aws_ssm_parameter.shopify_secret[0].arn, "arn:aws:ssm:${var.aws_region}:*:parameter/${var.project_name}/${var.environment}/secrets/shopify"),

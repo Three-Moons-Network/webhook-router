@@ -7,14 +7,13 @@ Uses mocking for DynamoDB and SNS.
 from __future__ import annotations
 
 import json
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 
 # ---------------------------------------------------------------------------
 # Stripe processor tests
 # ---------------------------------------------------------------------------
+
 
 class TestStripeProcessor:
     @patch("src.processors.stripe.table")
@@ -66,6 +65,7 @@ class TestStripeProcessor:
 # Shopify processor tests
 # ---------------------------------------------------------------------------
 
+
 class TestShopifyProcessor:
     @patch("src.processors.shopify.table")
     @patch("src.processors.shopify.sns_client")
@@ -115,6 +115,7 @@ class TestShopifyProcessor:
 # ---------------------------------------------------------------------------
 # GitHub processor tests
 # ---------------------------------------------------------------------------
+
 
 class TestGitHubProcessor:
     @patch("src.processors.github.table")
@@ -189,6 +190,7 @@ class TestGitHubProcessor:
 # Generic processor tests
 # ---------------------------------------------------------------------------
 
+
 class TestGenericProcessor:
     @patch("src.processors.generic.table")
     @patch("src.processors.generic.sns_client")
@@ -200,12 +202,14 @@ class TestGenericProcessor:
             "Records": [
                 {
                     "messageId": "msg_123",
-                    "body": json.dumps({
-                        "source": "generic",
-                        "event_type": "custom",
-                        "resource_id": "res_123",
-                        "raw_payload": {"custom_field": "value"},
-                    }),
+                    "body": json.dumps(
+                        {
+                            "source": "generic",
+                            "event_type": "custom",
+                            "resource_id": "res_123",
+                            "raw_payload": {"custom_field": "value"},
+                        }
+                    ),
                 }
             ]
         }
@@ -219,6 +223,7 @@ class TestGenericProcessor:
 # Lambda handler batch processing
 # ---------------------------------------------------------------------------
 
+
 class TestBatchProcessing:
     @patch("src.processors.stripe.table")
     def test_stripe_batch_processing(self, mock_table):
@@ -229,37 +234,41 @@ class TestBatchProcessing:
             "Records": [
                 {
                     "messageId": "msg_1",
-                    "body": json.dumps({
-                        "source": "stripe",
-                        "event_type": "payment_intent.succeeded",
-                        "resource_id": "pi_1",
-                        "raw_payload": {
-                            "data": {
-                                "object": {
-                                    "id": "pi_1",
-                                    "amount": 1000,
-                                    "currency": "usd",
+                    "body": json.dumps(
+                        {
+                            "source": "stripe",
+                            "event_type": "payment_intent.succeeded",
+                            "resource_id": "pi_1",
+                            "raw_payload": {
+                                "data": {
+                                    "object": {
+                                        "id": "pi_1",
+                                        "amount": 1000,
+                                        "currency": "usd",
+                                    }
                                 }
-                            }
-                        },
-                    }),
+                            },
+                        }
+                    ),
                 },
                 {
                     "messageId": "msg_2",
-                    "body": json.dumps({
-                        "source": "stripe",
-                        "event_type": "charge.failed",
-                        "resource_id": "ch_2",
-                        "raw_payload": {
-                            "data": {
-                                "object": {
-                                    "id": "ch_2",
-                                    "amount": 500,
-                                    "failure_message": "Card declined",
+                    "body": json.dumps(
+                        {
+                            "source": "stripe",
+                            "event_type": "charge.failed",
+                            "resource_id": "ch_2",
+                            "raw_payload": {
+                                "data": {
+                                    "object": {
+                                        "id": "ch_2",
+                                        "amount": 500,
+                                        "failure_message": "Card declined",
+                                    }
                                 }
-                            }
-                        },
-                    }),
+                            },
+                        }
+                    ),
                 },
             ]
         }
@@ -279,21 +288,25 @@ class TestBatchProcessing:
             "Records": [
                 {
                     "messageId": "msg_1",
-                    "body": json.dumps({
-                        "source": "stripe",
-                        "event_type": "payment_intent.succeeded",
-                        "resource_id": "pi_1",
-                        "raw_payload": {"data": {"object": {"id": "pi_1"}}},
-                    }),
+                    "body": json.dumps(
+                        {
+                            "source": "stripe",
+                            "event_type": "payment_intent.succeeded",
+                            "resource_id": "pi_1",
+                            "raw_payload": {"data": {"object": {"id": "pi_1"}}},
+                        }
+                    ),
                 },
                 {
                     "messageId": "msg_2",
-                    "body": json.dumps({
-                        "source": "stripe",
-                        "event_type": "charge.failed",
-                        "resource_id": "ch_2",
-                        "raw_payload": {"data": {"object": {"id": "ch_2"}}},
-                    }),
+                    "body": json.dumps(
+                        {
+                            "source": "stripe",
+                            "event_type": "charge.failed",
+                            "resource_id": "ch_2",
+                            "raw_payload": {"data": {"object": {"id": "ch_2"}}},
+                        }
+                    ),
                 },
             ]
         }

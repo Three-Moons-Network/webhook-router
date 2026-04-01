@@ -32,6 +32,7 @@ table = dynamodb.Table(DYNAMODB_TABLE)
 # Event processor
 # ---------------------------------------------------------------------------
 
+
 def process_generic_event(payload: dict[str, Any]) -> dict[str, Any]:
     """Process generic/custom webhook — pass through with minimal transformation."""
     return {
@@ -43,6 +44,7 @@ def process_generic_event(payload: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Lambda entry point
 # ---------------------------------------------------------------------------
+
 
 def lambda_handler(event: dict, context: Any) -> dict:
     """
@@ -102,12 +104,16 @@ def lambda_handler(event: dict, context: Any) -> dict:
             failed += 1
             batch_item_failures.append({"itemId": record.get("messageId", "")})
 
-    logger.info(f"Generic processing complete: {successful} successful, {failed} failed")
+    logger.info(
+        f"Generic processing complete: {successful} successful, {failed} failed"
+    )
 
     return {"batchItemFailures": batch_item_failures}
 
 
-def _send_sns_notification(source: str, event_type: str, processed_data: dict[str, Any]) -> None:
+def _send_sns_notification(
+    source: str, event_type: str, processed_data: dict[str, Any]
+) -> None:
     """Send processed event to SNS for downstream processing."""
     try:
         sns_client.publish(

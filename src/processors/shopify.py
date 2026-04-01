@@ -34,6 +34,7 @@ table = dynamodb.Table(DYNAMODB_TABLE)
 # Event processors
 # ---------------------------------------------------------------------------
 
+
 def process_order_created(payload: dict[str, Any]) -> dict[str, Any]:
     """Process new Shopify order."""
     order_number = payload.get("order_number", 0)
@@ -137,7 +138,9 @@ def process_shopify_event(message: dict[str, Any]) -> bool:
         return False
 
 
-def _send_sns_notification(source: str, event_type: str, processed_data: dict[str, Any]) -> None:
+def _send_sns_notification(
+    source: str, event_type: str, processed_data: dict[str, Any]
+) -> None:
     """Send processed event to SNS for downstream processing."""
     try:
         sns_client.publish(
@@ -152,6 +155,7 @@ def _send_sns_notification(source: str, event_type: str, processed_data: dict[st
 # ---------------------------------------------------------------------------
 # Lambda entry point
 # ---------------------------------------------------------------------------
+
 
 def lambda_handler(event: dict, context: Any) -> dict:
     """
@@ -179,6 +183,8 @@ def lambda_handler(event: dict, context: Any) -> dict:
             failed += 1
             batch_item_failures.append({"itemId": record.get("messageId", "")})
 
-    logger.info(f"Shopify processing complete: {successful} successful, {failed} failed")
+    logger.info(
+        f"Shopify processing complete: {successful} successful, {failed} failed"
+    )
 
     return {"batchItemFailures": batch_item_failures}

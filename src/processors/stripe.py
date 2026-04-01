@@ -34,6 +34,7 @@ table = dynamodb.Table(DYNAMODB_TABLE)
 # Event processors
 # ---------------------------------------------------------------------------
 
+
 def process_payment_intent_succeeded(payload: dict[str, Any]) -> dict[str, Any]:
     """Process successful Stripe payment intent."""
     data = payload.get("data", {})
@@ -130,14 +131,18 @@ def process_stripe_event(message: dict[str, Any]) -> bool:
                 "resource_id": resource_id,
                 "processed_data": processed,
                 "timestamp": message.get("timestamp", 0),
-                "ttl": int(__import__("time").time()) + (90 * 86400),  # 90 day retention
+                "ttl": int(__import__("time").time())
+                + (90 * 86400),  # 90 day retention
             }
         )
 
         logger.info(f"Processed Stripe event: {event_type} - {resource_id}")
 
         # Send downstream notification if configured
-        if SNS_TOPIC_ARN and event_type in ["payment_intent.succeeded", "charge.failed"]:
+        if SNS_TOPIC_ARN and event_type in [
+            "payment_intent.succeeded",
+            "charge.failed",
+        ]:
             _send_sns_notification("stripe", event_type, processed)
 
         return True
@@ -147,7 +152,9 @@ def process_stripe_event(message: dict[str, Any]) -> bool:
         return False
 
 
-def _send_sns_notification(source: str, event_type: str, processed_data: dict[str, Any]) -> None:
+def _send_sns_notification(
+    source: str, event_type: str, processed_data: dict[str, Any]
+) -> None:
     """Send processed event to SNS for downstream processing."""
     try:
         sns_client.publish(
@@ -162,6 +169,7 @@ def _send_sns_notification(source: str, event_type: str, processed_data: dict[st
 # ---------------------------------------------------------------------------
 # Lambda entry point
 # ---------------------------------------------------------------------------
+
 
 def lambda_handler(event: dict, context: Any) -> dict:
     """

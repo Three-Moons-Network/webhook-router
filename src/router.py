@@ -36,9 +36,11 @@ GENERIC_QUEUE_URL = os.environ.get("GENERIC_QUEUE_URL", "")
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class NormalizedEvent:
     """Normalized webhook event across all sources."""
+
     source: str
     event_type: str
     timestamp: int
@@ -50,6 +52,7 @@ class NormalizedEvent:
 # ---------------------------------------------------------------------------
 # Signature validation
 # ---------------------------------------------------------------------------
+
 
 def validate_stripe_signature(body: str, signature: str, secret: str) -> bool:
     """Validate Stripe webhook signature."""
@@ -80,6 +83,7 @@ def validate_shopify_signature(body: str, signature: str, secret: str) -> bool:
         ).digest()
 
         import base64
+
         received_sig = base64.b64decode(signature)
 
         return hmac.compare_digest(expected_sig, received_sig)
@@ -108,6 +112,7 @@ def validate_github_signature(body: str, signature: str, secret: str) -> bool:
 # Get secrets from SSM
 # ---------------------------------------------------------------------------
 
+
 def get_webhook_secret(source: str) -> str:
     """Retrieve webhook secret from SSM Parameter Store."""
     try:
@@ -122,6 +127,7 @@ def get_webhook_secret(source: str) -> str:
 # ---------------------------------------------------------------------------
 # Webhook route handlers
 # ---------------------------------------------------------------------------
+
 
 def handle_stripe(body: str, headers: dict[str, str]) -> NormalizedEvent | None:
     """Parse and validate Stripe webhook."""
@@ -171,7 +177,9 @@ def handle_shopify(body: str, headers: dict[str, str]) -> NormalizedEvent | None
         return NormalizedEvent(
             source="shopify",
             event_type=event_type,
-            timestamp=int(headers.get("x-shopify-api-call-limit", "0").split("/")[1] or 0),
+            timestamp=int(
+                headers.get("x-shopify-api-call-limit", "0").split("/")[1] or 0
+            ),
             resource_id=resource_id,
             payload={
                 "event_type": event_type,
@@ -202,7 +210,9 @@ def handle_github(body: str, headers: dict[str, str]) -> NormalizedEvent | None:
         return NormalizedEvent(
             source="github",
             event_type=event_type,
-            timestamp=int(payload.get("created_at", 0)) if payload.get("created_at") else 0,
+            timestamp=int(payload.get("created_at", 0))
+            if payload.get("created_at")
+            else 0,
             resource_id=str(resource_id),
             payload={
                 "event_type": event_type,
@@ -240,6 +250,7 @@ def handle_generic(body: str, headers: dict[str, str]) -> NormalizedEvent | None
 # SQS routing
 # ---------------------------------------------------------------------------
 
+
 def route_to_queue(event: NormalizedEvent) -> bool:
     """Route normalized event to appropriate SQS queue."""
     queue_mapping = {
@@ -264,7 +275,9 @@ def route_to_queue(event: NormalizedEvent) -> bool:
                 "resource_id": {"StringValue": event.resource_id, "DataType": "String"},
             },
         )
-        logger.info(f"Routed {event.source}/{event.event_type} to queue: {event.resource_id}")
+        logger.info(
+            f"Routed {event.source}/{event.event_type} to queue: {event.resource_id}"
+        )
         return True
     except Exception as exc:
         logger.error(f"Failed to send message to SQS: {exc}")
@@ -274,6 +287,7 @@ def route_to_queue(event: NormalizedEvent) -> bool:
 # ---------------------------------------------------------------------------
 # Lambda entry point
 # ---------------------------------------------------------------------------
+
 
 def lambda_handler(event: dict, context: Any) -> dict:
     """

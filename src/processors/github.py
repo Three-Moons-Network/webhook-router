@@ -34,6 +34,7 @@ table = dynamodb.Table(DYNAMODB_TABLE)
 # Event processors
 # ---------------------------------------------------------------------------
 
+
 def process_push(payload: dict[str, Any]) -> dict[str, Any]:
     """Process GitHub push event."""
     repo = payload.get("repository", {})
@@ -90,7 +91,7 @@ def process_issues(payload: dict[str, Any]) -> dict[str, Any]:
         "issue_number": issue.get("number", 0),
         "issue_title": issue.get("title", ""),
         "author": issue.get("user", {}).get("login", ""),
-        "labels": [l.get("name", "") for l in issue.get("labels", [])],
+        "labels": [lbl.get("name", "") for lbl in issue.get("labels", [])],
         "timestamp": payload.get("created_at", ""),
     }
 
@@ -154,7 +155,9 @@ def process_github_event(message: dict[str, Any]) -> bool:
         return False
 
 
-def _send_sns_notification(source: str, event_type: str, processed_data: dict[str, Any]) -> None:
+def _send_sns_notification(
+    source: str, event_type: str, processed_data: dict[str, Any]
+) -> None:
     """Send processed event to SNS for downstream processing."""
     try:
         sns_client.publish(
@@ -169,6 +172,7 @@ def _send_sns_notification(source: str, event_type: str, processed_data: dict[st
 # ---------------------------------------------------------------------------
 # Lambda entry point
 # ---------------------------------------------------------------------------
+
 
 def lambda_handler(event: dict, context: Any) -> dict:
     """
