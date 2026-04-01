@@ -174,12 +174,15 @@ def handle_shopify(body: str, headers: dict[str, str]) -> NormalizedEvent | None
         event_type = headers.get("x-shopify-topic", "unknown")
         resource_id = headers.get("x-shopify-shop-id", "")
 
+        # Parse x-shopify-api-call-limit header (format: "32/40"), default to 0 if missing
+        api_limit_header = headers.get("x-shopify-api-call-limit", "0/0")
+        api_limit_parts = api_limit_header.split("/")
+        timestamp = int(api_limit_parts[1]) if len(api_limit_parts) > 1 else 0
+
         return NormalizedEvent(
             source="shopify",
             event_type=event_type,
-            timestamp=int(
-                headers.get("x-shopify-api-call-limit", "0").split("/")[1] or 0
-            ),
+            timestamp=timestamp,
             resource_id=resource_id,
             payload={
                 "event_type": event_type,
